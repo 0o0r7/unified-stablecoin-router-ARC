@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHADOW_ARCHIVE // 01</title>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #e0e0e0;
+            --accent-color: #00f3ff; /* Cyan */
+            --accent-glow: rgba(0, 243, 255, 0.4);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --font-main: 'Helvetica Neue', 'Arial', sans-serif;
+            --marquee-speed: 20s;
+        }
+
+        /* RESET & BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* BACKGROUND MESH - CANVAS */
+        #mesh-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* LAYOUT & CONTAINERS */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 8rem);
+            line-height: 0.9;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .glitch-wrapper {
+            position: relative;
+        }
+
+        /* GLASSMORPHISM COMPONENT */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            padding: 2rem;
+            max-width: 600px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            margin-bottom: 2rem;
+            transition: all 0.5s ease;
+        }
+
+        p.subtext {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: #ccc;
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* ARCHIVE SECTION (Portfolio) */
+        #archive {
+            padding: 5rem 0;
+            min-height: 60vh;
+        }
+
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .archive-item {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 1.5rem 0;
+        }
+
+        .archive-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        .decrypt-text {
+            font-family: 'Courier New', monospace;
+            color: var(--text-color);
+        }
+
+        /* MARQUEE FOOTER */
+        .marquee-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.8);
+            border-top: 1px solid var(--accent-color);
+            overflow: hidden;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .marquee-content {
+            white-space: nowrap;
+            animation: scroll var(--marquee-speed) linear infinite;
+            font-family: monospace;
+            color: var(--accent-color);
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* =========================================
+           SHADOW MODE / ANTI-DESIGN STYLES
+           ========================================= */
+        
+        body.shadow-mode {
+            --bg-color: #f0f0f0;
+            --text-color: #111;
+            --accent-color: #ff003c; /* Cyberpunk Red for Shadow Mode */
+            --glass-bg: rgba(0, 0, 0, 0.05);
+            --glass-border: rgba(0, 0, 0, 0.2);
+        }
+
+        body.shadow-mode .glass-panel {
+            backdrop-filter: none; /* Remove blur for raw look */
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 8px 8px 0px #000; /* Hard shadow */
+            border-radius: 0;
+        }
+
+        body.shadow-mode h1 {
+            color: #000;
+            text-shadow: 2px 2px 0px var(--accent-color);
+            /* Glitch Animation */
+            animation: textGlitch 0.3s infinite;
+        }
+
+        body.shadow-mode .btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            box-shadow: 5px 5px 0px var(--accent-color);
+        }
+        
+        body.shadow-mode .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0px var(--accent-color);
+        }
+
+        body.shadow-mode #archive {
+            /* Raw Texture Overlay */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+        }
+
+        /* Glitch Keyframes */
+        @keyframes textGlitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* Reveal Animation Classes */
+        .char {
+            opacity: 0;
+            display: inline-block;
+        }
+        .char.revealed {
+            animation: revealChar 0.1s forwards;
+        }
+        @keyframes revealChar {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Easter Egg Message Hidden */
+        #easter-egg {
+            display: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-top: 2rem;
+            border: 1px dashed var(--accent-color);
+            padding: 1rem;
+        }
+
+        body.shadow-mode #easter-egg {
+            display: block;
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- BACKGROUND CANVAS -->
+    <canvas id="mesh-canvas"></canvas>
+
+    <div class="container">
+        <header>
+            <div class="logo">SHADOW_ARCHIVE // 01</div>
+        </header>
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="glass-panel">
+                <div class="glitch-wrapper">
+                    <h1 id="main-headline">Beyond the<br>Surface.</h1>
+                </div>
+                <p class="subtext">
+                    Navigating the duality of digital aesthetics. 
+                    Experience the standard interface, or decrypt the hidden layers.
+                </p>
+                <button class="btn" id="decrypt-btn">INITIALIZE_DECRYPT</button>
+            </div>
+        </section>
+
+        <!-- ARCHIVE / PORTFOLIO -->
+        <section id="archive">
+            <h2 style="border-bottom: 1px solid var(--accent-color); padding-bottom: 10px;">// ARCHIVE_DATA</h2>
+            <div class="archive-grid">
+                <div class="archive-item">
+                    <div class="archive-title">PROJECT_ALPHA</div>
+                    <div class="decrypt-text" id="text-alpha">Lead Architect for complex frontend solutions utilizing React and WebGL. (00:01)</div>
+                </div>
+                <div class="archive-item">
+                    <div class="archive-title">SYSTEM_OPTIMIZATION</div>
+                    <div class="decrypt-text" id="text-beta">Reduced load times by 40% through advanced asset caching strategies. (00:02)</div>
+                </div>
+                <div class="archive-item">
+                    <div class="archive-title">USER_VELOCITY</div>
+                    <div class="decrypt-text" id="text-gamma">Designed interaction patterns that increased user retention metrics significantly. (00:03)</div>
+                </div>
+            </div>
+
+            <!-- EASTER EGG CONTAINER -->
+            <div id="easter-egg">
+                > ACCESS GRANTED.<br>
+                > IDENTITY CONFIRMED: SENIOR FRONTEND ARCHITECT.<br>
+                > SKILLSET: JAVASCRIPT, HTML5, CSS3, WEBGL, REACT.<br>
+                > MISSION: DECONSTRUCT BARRIERS BETWEEN DESIGN AND CODE.
+            </div>
+        </section>
+    </div>
+
+    <!-- MARQUEE -->
+    <div class="marquee-container">
+        <div class="marquee-content">
+            SYSTEM STATUS: DUALITY ACTIVE — ARCHIVE LOADED — SCROLL TO DECRYPT — SYSTEM STATUS: DUALITY ACTIVE — ARCHIVE LOADED — SCROLL TO DECRYPT —
+        </div>
+    </div>
+
+    <script>
+        /**
+         * LOGIC MESH BACKGROUND (CANVAS)
+         */
+        const canvas = document.getElementById('mesh-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.size = Math.random() * 2 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(0, 243, 255, 0.8)'; // Cyan
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const particleCount = Math.min(window.innerWidth / 10, 100); // Responsive count
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateMesh() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Draw lines
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${1 - distance / 150})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateMesh);
+        }
+        initParticles();
+        animateMesh();
+
+        /**
+         * SHADOW MODE LOGIC
+         */
+        const decryptBtn = document.getElementById('decrypt-btn');
+        const body = document.body;
+        const archiveTexts = [
+            document.getElementById('text-alpha'),
+            document.getElementById('text-beta'),
+            document.getElementById('text-gamma')
+        ];
+
+        let isShadowMode = false;
+
+        // Helper: Stagger Reveal
+        function revealText(element) {
+            const text = element.innerText;
+            element.innerHTML = ''; // Clear original text
+            
+            // Create spans for each character
+            const chars = text.split('');
+            chars.forEach((char, index) => {
+                const span = document.createElement('span');
+                span.innerText = char;
+                span.className = 'char';
+                // Store the index for timing
+                span.style.animationDelay = `${index * 0.05}s`; 
+                element.appendChild(span);
+            });
+
+            // Trigger animation
+            setTimeout(() => {
+                const charElements = element.querySelectorAll('.char');
+                charElements.forEach((el, i) => {
+                    setTimeout(() => {
+                        el.classList.add('revealed');
+                    }, i * 30); // Fast stagger
+                });
+            }, 100);
+        }
+
+        decryptBtn.addEventListener('click', () => {
+            if (isShadowMode) {
+                // Reset to normal if clicked again
+                location.reload(); // Simple reload to reset DOM state cleanly
+                return;
+            }
+
+            isShadowMode = true;
+            body.classList.add('shadow-mode');
+            
+            // Change Button Text
+            decryptBtn.innerText = "SYSTEM_OVERRIDE_COMPLETE";
+
+            // Apply stagger reveal to archive content
+            archiveTexts.forEach((el, index) => {
+                setTimeout(() => {
+                    revealText(el);
+                }, index * 800); // Delay between different items
+            });
+
+            // Change Headline dynamically
+            const headline = document.getElementById('main-headline');
+            headline.innerText = "BREACHING CORE.";
+            headline.style.color = "var(--accent-color)"; // In shadow mode, this will be red
+        });
+
+        /**
+         * SMOOTH SCROLL ANCHOR FIX
+         * (Though not strictly necessary for single page, ensures behavior is consistent)
+         */
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
